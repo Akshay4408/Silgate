@@ -1,0 +1,184 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[353]:
+
+
+import pandas as pd
+import numpy as np
+
+
+# In[354]:
+
+
+B1 = pd.read_excel(r"C:\Users\reportsn\Desktop\Akshay\Barc Report1.xlsx")
+B1.head()
+
+
+# In[355]:
+
+
+B1['Net Login1'] = B1['LOGIN TIME1'] - B1['BREAK'] 
+B1['Net Login1'] = B1['Net Login1'].fillna(0)
+B1.head()
+
+
+# In[356]:
+
+
+import operator
+fmt = operator.methodcaller('strftime', '%H:%M:%S')
+B1['Net Login'] = pd.to_datetime(B1['Net Login1'], unit='s').map(fmt)
+
+B1.head()
+
+
+# In[357]:
+
+
+B1['Utilization %'] = (B1['Net Login1'] / B1['LOGIN TIME1'] * 100)
+
+B1['Utilization %'] = B1['Utilization %'].apply(np.ceil) 
+B1['Utilization %'] = B1['Utilization %'].map(str) + '%'
+
+
+B1.head()
+
+
+# In[358]:
+
+
+from datetime import date
+from datetime import timedelta
+
+
+# In[359]:
+
+
+B1['DATE'] =  date.today()
+#Result['DATE']  =Result['DATE'].dt.strftime("%m/%d/%y")
+B1['DATE']  =  B1['DATE'] - timedelta(days = 1)
+B1.head()
+
+
+# In[360]:
+
+
+B1.columns
+
+
+# In[361]:
+
+
+B1 = B1[['DATE',  'USER', 'Campaign','ID', 'CALLS','Shift', 'LOGIN TIME', 'TALK', 'WAIT', 'DISPO', 'PAUSE', 'Bio', 'LunchB', 'Meetin', 'TeaBre', 'Productive Break', 'Non productive Break', 'Break %', 'Net Login', 'Utilization %']]
+B1.head()
+
+
+# In[362]:
+
+
+EMP = pd.read_excel(r"C:\Users\reportsn\Desktop\Akshay\LL Data Dump.xlsx")
+
+
+EMP.head()
+
+
+# In[363]:
+
+
+
+EMP = EMP.drop(['Total Hrs'], axis = 1)
+EMP = EMP.rename(columns = {'EMP ID' : 'ID'})
+
+EMP.head()
+
+
+# In[364]:
+
+
+
+
+Resultant = pd.merge(B1, EMP, how='left',
+        left_on='ID', right_on='ID')
+#Attend = Attend.rename(columns = {'full_name' : 'USER NAME'})
+
+
+Resultant.head()
+
+
+# In[365]:
+
+
+Resultant['TALK1'] = pd.to_timedelta(Resultant['TALK'])
+Resultant['DISPO1'] = pd.to_timedelta(Resultant['DISPO'])
+Resultant['LOGIN TIME1'] = pd.to_timedelta(Resultant['LOGIN TIME'])
+
+
+# In[366]:
+
+
+Resultant['AHT'] = (Resultant['TALK1'] + Resultant['DISPO1']) / Resultant['CALLS']
+
+Resultant = Resultant.drop(['TALK1', 'DISPO1','LOGIN TIME1'], axis = 1)
+
+Resultant['AHT'] = Resultant['AHT'].dt.total_seconds()
+Resultant['AHT'] = Resultant['AHT'].fillna(0)
+
+Resultant
+
+
+# In[367]:
+
+
+import operator
+fmt = operator.methodcaller('strftime', '%H:%M:%S')
+Resultant['AHT'] = pd.to_datetime(Resultant['AHT'], unit='s').map(fmt)
+
+Resultant.head()
+
+
+# In[ ]:
+
+
+
+
+
+# In[368]:
+
+
+Maintance = Resultant.loc[Resultant['Campaign'] == "Maintenance"]
+
+INB = Resultant[Resultant['Campaign'] != 'Maintenance']
+
+
+# In[369]:
+
+
+writer = pd.ExcelWriter(r"C:\Users\reportsn\Desktop\Akshay\Barc Result Report.xlsx", engine='xlsxwriter')
+
+
+# In[370]:
+
+
+Maintance.to_excel(writer, sheet_name='Maintance', index=False)
+
+INB.to_excel(writer, sheet_name='INB', index=False)
+
+Resultant.to_excel(writer, sheet_name='Resultant')
+
+
+
+
+
+# In[371]:
+
+
+writer.save()
+
+
+# In[ ]:
+
+
+
+
+

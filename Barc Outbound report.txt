@@ -1,0 +1,93 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[81]:
+
+
+import pandas as pd
+import numpy as np
+
+
+# In[82]:
+
+
+Maint = pd.read_excel(r"C:\Users\reportsn\Desktop\Akshay\Barc Result Report.xlsx")
+Maint.head()
+
+
+# In[83]:
+
+
+Maint["Date1"] = pd.to_datetime(Maint["DATE"]).dt.strftime("%Y%m%d")
+
+Maint['Unique'] = Maint['Date1'].map(str)+ Maint['ID'].map(str)
+
+Maint.head()
+
+
+# In[84]:
+
+
+Maint['Present'] = Maint.groupby(['Unique']).cumcount()+1
+Maint['Shift'] = "11:00"
+Maint.head()
+
+
+# In[85]:
+
+
+Maint.info()
+
+
+# In[86]:
+
+
+Maint = Maint[['DATE', 'USER', 'Campaign', 'ID', 'Unique','Present','CALLS','Shift', 'LOGIN TIME', 'TALK', 'WAIT', 'DISPO', 'PAUSE', 'Bio', 'LunchB', 'Meetin', 'TeaBre', 'Productive Break', 'Non productive Break', 'Break %', 'Net Login', 'AHT', 'Utilization %', 'Login Time', 'Logout Time']]
+Maint.head()
+
+
+# In[87]:
+
+
+# Break
+
+Maint['TALK1'] = pd.to_timedelta(Maint['TALK'])
+Maint['DISPO1'] = pd.to_timedelta(Maint['DISPO'])
+Maint['WAIT1'] = pd.to_timedelta(Maint['WAIT'])
+
+Maint['OUT Occupancy1'] =  (Maint['TALK1'] + Maint['DISPO1'])
+Maint['OUT Occupancy2'] =  (Maint['TALK1'] + Maint['DISPO1'] + Maint['WAIT1'])
+
+Maint['OUT Occupancy%'] = ( Maint['OUT Occupancy1'] / Maint['OUT Occupancy2'] *100)
+
+
+#) / (Maint['TALK1'] + Maint['DISPO1'] + Maint['WAIT1'])
+
+#Maint['OUT Occupancy%'] = pd.to_datetime(Maint['OUT Occupancy%'], errors='coerce')
+
+
+Maint['OUT Occupancy1'] = Maint['OUT Occupancy1'].dt.total_seconds()
+Maint['OUT Occupancy2'] = Maint['OUT Occupancy2'].dt.total_seconds()
+Maint['OUT Occupancy%'] = Maint['OUT Occupancy1'] / Maint['OUT Occupancy2']
+
+
+#operator for time
+#Maint['OUT Occupancy%'] = Maint['OUT Occupancy%'].fillna(0)
+Maint = Maint.drop(['TALK1', 'DISPO1', 'WAIT1', 'OUT Occupancy1', 'OUT Occupancy2'], axis = 1)
+
+
+Maint.head()
+
+
+# In[ ]:
+
+
+
+
+
+# In[88]:
+
+
+Maint.to_excel(r"C:\Users\reportsn\Desktop\Akshay\Outbound Report.xlsx", index= False)
+
+

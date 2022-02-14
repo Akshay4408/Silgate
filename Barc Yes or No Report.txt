@@ -1,0 +1,113 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[65]:
+
+
+import pandas as pd
+import numpy as np
+
+
+# In[66]:
+
+
+MTDINB = pd.read_excel(r"C:\Users\reportsn\Desktop\Akshay\Barc Inbound.xlsx")
+MTDINB.head()
+
+
+# In[67]:
+
+
+def test(x):
+    if x <= "10:00:00":
+        return "Yes"
+    else:
+        return "No"
+    
+
+
+# In[68]:
+
+
+MTDINB['Login on (0 min buffer)'] = MTDINB['Login Time'].apply(lambda x: test(x))
+MTDINB.head()
+
+
+# In[69]:
+
+
+def test1(x):
+    if x == "Yes":
+        return 1
+    else:
+        return 0
+    
+
+
+# In[70]:
+
+
+MTDINB['Yes @ 0 Min'] = MTDINB['Login on (0 min buffer)'].apply(lambda x: test1(x))
+MTDINB.head()
+
+
+# In[71]:
+
+
+def test2(x):
+    if x == "No":
+        return 1
+    else:
+        return 0
+    
+
+
+# In[72]:
+
+
+MTDINB['No @ 0 Min'] = MTDINB['Login on (0 min buffer)'].apply(lambda x: test2(x))
+MTDINB.head()
+
+
+# In[73]:
+
+
+def test3(x):
+    if x >= "10:00:00":
+        return "Yes"
+    else:
+        return "No"
+    
+
+
+# In[74]:
+
+
+MTDINB['Login on (After 15 min)'] = MTDINB['Login Time'].apply(lambda x: test3(x))
+MTDINB.head()
+
+
+# In[75]:
+
+
+def test4(x):
+    if x == "Yes":
+        return 1
+    else:
+        return 0
+    
+
+
+# In[76]:
+
+
+MTDINB['Yes @ After 15 Min'] = MTDINB['Login on (After 15 min)'].apply(lambda x: test4(x))
+MTDINB.head()
+
+
+# In[ ]:
+
+
+
+
+

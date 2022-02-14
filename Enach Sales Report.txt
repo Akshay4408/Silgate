@@ -1,0 +1,235 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[24]:
+
+
+import pandas as pd
+import numpy as np
+
+
+# In[25]:
+
+
+Client = pd.read_excel(r"C:\Users\reportsn\Desktop\Enach\Enach.xlsx")
+Client.head()
+
+
+# In[26]:
+
+
+Client.info()
+
+
+# In[27]:
+
+
+Dispo= pd.read_excel(r"C:\Users\reportsn\Desktop\Enach\Enach dispositions.xlsx")
+Dispo.head()
+
+
+# In[28]:
+
+
+Client = pd.merge(Client, Dispo, how='left',
+        left_on='REMARK', right_on='REMARK')
+
+#Client = Client.rename(columns = {'MOBILE': 'phone_number_dialed'})
+
+Client.head()
+
+
+# In[29]:
+
+
+#Ative = Client.loc[Client['Enach Status'] == "E Nach Active"]
+
+
+# In[30]:
+
+
+Client.info()
+
+
+# In[ ]:
+
+
+
+
+
+# In[31]:
+
+
+#Client['Month'] = pd.to_datetime(Client['Month'], errors='coerce')
+
+#Client['Month'] = Client['Month'].dt.strftime('%b-%y')
+
+#Client.head()
+
+
+# In[32]:
+
+
+NOP = Client.loc[Client['CATOGERY'] == "NOP"]
+OD = Client.loc[Client['CATOGERY'] == "OD"]
+
+
+# In[33]:
+
+
+NOP.head()
+
+
+# In[34]:
+
+
+NOP.info()
+
+
+# In[35]:
+
+
+NOPCOUNT =pd.pivot_table(data= NOP, index = ['Enach Status'], columns=['Month', 'POLICY TYPE'],values = 'Week', aggfunc = np.size, fill_value=0, margins = True, margins_name= 'Total')
+
+#ODC = ODC.rename(columns = {'Total': 'Overall calling'})
+#ODC= ODC['Overall calling', 'Connect', 'Not Connect']]
+
+name_order = ['Jan-21', 'Feb-21', 'Mar-21', 'Apr-21', 'May-21', 'Jun-21', 'Jul-21', 'Aug-21', 'Sep-21', 'Oct-21', 'Nov-21', 'Dec-21', 'Total']
+
+NOPCOUNT = NOPCOUNT[name_order]
+
+NOPCOUNT
+
+
+# In[36]:
+
+
+ODCOUNT =pd.pivot_table(data= OD, index = ['Enach Status'], columns=['Month', 'POLICY TYPE'],values = 'Week', aggfunc = np.size, fill_value=0, margins = True, margins_name= 'Total')
+#ODC = ODC.rename(columns = {'Total': 'Overall calling'})
+#ODC= ODC[['Overall calling', 'Connect', 'Not Connect']]
+
+name_order = ['Jan-21', 'Feb-21', 'Mar-21', 'Apr-21', 'May-21', 'Jun-21', 'Jul-21', 'Aug-21', 'Sep-21', 'Oct-21', 'Nov-21', 'Dec-21', 'Total']
+
+ODCOUNT = ODCOUNT[name_order]
+ODCOUNT
+
+
+# In[37]:
+
+
+NOPAMOUNT =pd.pivot_table(data= NOP, index = ['Enach Status'], columns=['Month', 'POLICY TYPE'],values = 'Net', aggfunc = np.sum, fill_value=0, margins = True, margins_name= 'Total')
+#ODC = ODC.rename(columns = {'Total': 'Overall calling'})
+#ODC= ODC[['Overall calling', 'Connect', 'Not Connect']]
+
+name_order = ['Jan-21', 'Feb-21', 'Mar-21', 'Apr-21', 'May-21', 'Jun-21', 'Jul-21', 'Aug-21', 'Sep-21', 'Oct-21', 'Nov-21', 'Dec-21', 'Total']
+
+NOPAMOUNT = NOPAMOUNT[name_order]
+
+NOPAMOUNT
+
+
+# In[38]:
+
+
+ODAMOUNT =pd.pivot_table(data= OD, index = ['Enach Status'], columns=['Month', 'POLICY TYPE'],values = 'Net', aggfunc = np.sum, fill_value=0, margins = True, margins_name= 'Total')
+#ODC = ODC.rename(columns = {'Total': 'Overall calling'})
+#ODC= ODC[['Overall calling', 'Connect', 'Not Connect']]
+
+name_order = ['Jan-21', 'Feb-21', 'Mar-21', 'Apr-21', 'May-21', 'Jun-21', 'Jul-21', 'Aug-21', 'Sep-21', 'Oct-21', 'Nov-21', 'Dec-21', 'Total']
+
+ODAMOUNT = ODAMOUNT[name_order]
+
+ODAMOUNT
+
+
+
+# In[39]:
+
+
+Pending = Client.loc[Client['Enach Status'] == "E Nach Pending"]
+
+
+# In[40]:
+
+
+Pending =pd.pivot_table(data= Pending, index = ['REMARK'], columns=['Month', 'POLICY TYPE'],values = 'Week', aggfunc = np.size, fill_value=0, margins = True, margins_name= 'Total')
+#ODC = ODC.rename(columns = {'Total': 'Overall calling'})
+#ODC= ODC[['Overall calling', 'Connect', 'Not Connect']]
+
+name_order = ['Jan-21', 'Feb-21', 'Mar-21', 'Apr-21', 'May-21', 'Jun-21', 'Jul-21', 'Aug-21', 'Sep-21', 'Oct-21', 'Nov-21', 'Dec-21', 'Total']
+
+Pending = Pending[name_order]
+
+Pending
+
+
+# In[41]:
+
+
+Remark =pd.pivot_table(data= Client, index = ['REMARK'], columns=['Month', 'CATOGERY'],values = 'Week', aggfunc = np.size, fill_value=0, margins = True, margins_name= 'Total')
+#ODC = ODC.rename(columns = {'Total': 'Overall calling'})
+#ODC= ODC[['Overall calling', 'Connect', 'Not Connect']]
+
+name_order = ['Jan-21', 'Feb-21', 'Mar-21', 'Apr-21', 'May-21', 'Jun-21', 'Jul-21', 'Aug-21', 'Sep-21', 'Oct-21', 'Nov-21', 'Dec-21', 'Total']
+
+Remark = Remark[name_order]
+
+Remark
+
+
+# In[42]:
+
+
+Cancel = Client.loc[Client['Enach Status'] == "Cancelled/Not Ready/Pay Yearly/No Bank ac"]
+
+
+# In[43]:
+
+
+Cancel =pd.pivot_table(data= Cancel, index = ['REMARK'], columns=['Month', 'POLICY TYPE'],values = 'Week', aggfunc = np.size, fill_value=0, margins = True, margins_name= 'Total')
+#ODC = ODC.rename(columns = {'Total': 'Overall calling'})
+#ODC= ODC[['Overall calling', 'Connect', 'Not Connect']]
+
+name_order = ['Jan-21', 'Feb-21', 'Mar-21', 'Apr-21', 'May-21', 'Jun-21', 'Jul-21', 'Aug-21', 'Sep-21', 'Oct-21', 'Nov-21', 'Dec-21', 'Total']
+
+Cancel = Cancel[name_order]
+
+Cancel
+
+
+# In[44]:
+
+
+writer = pd.ExcelWriter(r"C:\Users\reportsn\Desktop\Akshay\Enach Monthly Report.xlsx", engine='xlsxwriter')
+
+
+# In[45]:
+
+
+NOPCOUNT.to_excel(writer, sheet_name='NOPCOUNT')
+ODCOUNT.to_excel(writer, sheet_name='ODCOUNT')
+
+NOPAMOUNT.to_excel(writer, sheet_name='NOPAMOUNT')
+ODAMOUNT.to_excel(writer, sheet_name='ODAMOUNT')
+
+Pending.to_excel(writer, sheet_name='Pending')
+Remark.to_excel(writer, sheet_name='Remark')
+Cancel.to_excel(writer, sheet_name='Cancel')
+
+
+Client.to_excel(writer, sheet_name='Export')
+
+
+
+# In[46]:
+
+
+writer.save()
+
+
+# In[ ]:
+
+
+
+
+

@@ -1,0 +1,117 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[94]:
+
+
+import pandas as pd
+import numpy as np
+
+
+# In[95]:
+
+
+EMP = pd.read_excel(r"C:\Users\reportsn\Desktop\Barc\EMP List.xlsx")
+EMP.head()
+
+
+# In[96]:
+
+
+Dump = pd.read_excel(r"C:\Users\reportsn\Desktop\Akshay\Overall Data Dump.xlsx")
+Dump = Dump.drop(['USER', 'Campaign'], axis = 1)
+Dump.head()
+
+
+# In[97]:
+
+
+
+
+Report = pd.merge(EMP, Dump, how='left',
+        left_on='ID', right_on='ID')
+#Attend = Attend.rename(columns = {'full_name' : 'USER NAME'})
+
+Report['Shift'] = "10:00"
+Report['Productive Break'] = Report['Meetin'] 
+
+Report.head()
+
+
+# In[98]:
+
+
+# Break
+
+Report['LunchB1'] = pd.to_timedelta(Report['LunchB'])
+Report['TeaBre1'] = pd.to_timedelta(Report['TeaBre'])
+Report['Bio1'] = pd.to_timedelta(Report['Bio'])
+
+Report['BREAK'] = Report['LunchB1'] + Report['TeaBre1'] + Report['Bio1']
+
+Report['BREAK'] = Report['BREAK'].dt.total_seconds()
+
+
+
+#operator for time
+Report['BREAK'] = Report['BREAK'].fillna(0)
+
+
+Report.head()
+
+
+# In[99]:
+
+
+import operator
+fmt = operator.methodcaller('strftime', '%H:%M:%S')
+Report['Non productive Break'] = pd.to_datetime(Report['BREAK'], unit='s').map(fmt)
+
+Report = Report.drop(['LunchB1', 'TeaBre1', 'Bio1'], axis = 1)
+
+Report['LOGIN TIME1'] = pd.to_timedelta(Report['LOGIN TIME'])
+Report['LOGIN TIME1'] = Report['LOGIN TIME1'].dt.total_seconds()
+
+
+Report.head()
+
+
+# In[100]:
+
+
+Report['Break %'] = (Report['BREAK'] / Report['LOGIN TIME1'] * 100)
+Report['Break %'] = Report['Break %'].apply(np.ceil) 
+Report['Break %'] = Report['Break %'].map(str) + '%'
+Report.head()
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[101]:
+
+
+Report.to_excel(r"C:\Users\reportsn\Desktop\Akshay\Barc Report1.xlsx", index= False)
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+

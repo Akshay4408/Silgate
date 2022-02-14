@@ -1,0 +1,65 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[61]:
+
+
+import pandas as pd
+import numpy as np
+
+
+# In[62]:
+
+
+PMC = pd.read_excel(r"C:\Users\reportsn\Desktop\Barc\PMS.xlsx")
+PMC = PMC.iloc[1: , :]
+PMC = PMC.rename(columns=PMC.iloc[0]).drop(PMC.index[0])
+PMC = PMC.iloc[:-1 , :]
+
+PMC.head()
+
+
+# In[63]:
+
+
+Maintance = pd.read_excel(r"C:\Users\reportsn\Desktop\Barc\Maintenance.xlsx")
+Maintance = Maintance.iloc[1: , :]
+Maintance = Maintance.rename(columns=Maintance.iloc[0]).drop(Maintance.index[0])
+Maintance = Maintance.iloc[:-1 , :]
+
+Maintance.head()
+
+
+# In[64]:
+
+
+Currency = pd.read_excel(r"C:\Users\reportsn\Desktop\Barc\Currency.xlsx")
+Currency = Currency.iloc[1: , :]
+Currency = Currency.rename(columns=Currency.iloc[0]).drop(Currency.index[0])
+Currency = Currency.iloc[:-1 , :]
+
+Currency.head()
+
+
+# In[65]:
+
+
+Data = Maintance.append(PMC)
+Data = Data.append(Currency)
+
+
+Data
+
+
+# In[66]:
+
+
+Data.to_excel(r"C:\Users\reportsn\Desktop\Akshay\Overall Data Dump.xlsx", index= False)
+
+
+# In[ ]:
+
+
+
+
+

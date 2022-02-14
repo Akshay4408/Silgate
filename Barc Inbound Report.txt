@@ -1,0 +1,102 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[167]:
+
+
+import pandas as pd
+import numpy as np
+
+
+# In[168]:
+
+
+INB = pd.read_excel(r"C:\Users\reportsn\Desktop\Akshay\Barc Result Report.xlsx", sheet_name = "INB")
+INB.head()
+
+
+# In[169]:
+
+
+INB["Date1"] = pd.to_datetime(INB["DATE"]).dt.strftime("%Y%m%d")
+
+INB['Unique'] = INB['Date1'].map(str)+ INB['ID'].map(str)
+
+INB.head()
+
+
+# In[170]:
+
+
+INB['Present'] = INB.groupby(['Unique']).cumcount()+1
+INB.head()
+
+
+# In[171]:
+
+
+INB = INB[['DATE', 'USER', 'Campaign', 'ID', 'Unique','Present','CALLS','Shift', 'LOGIN TIME', 'TALK', 'WAIT', 'DISPO', 'PAUSE', 'Bio', 'LunchB', 'Meetin', 'TeaBre', 'Productive Break', 'Non productive Break', 'Break %', 'Net Login', 'AHT','Utilization %', 'Login Time', 'Logout Time']]
+INB.head()
+
+
+# In[172]:
+
+
+# Break
+
+INB['TALK1'] = pd.to_timedelta(INB['TALK'])
+INB['DISPO1'] = pd.to_timedelta(INB['DISPO'])
+INB['WAIT1'] = pd.to_timedelta(INB['WAIT'])
+
+INB['OUT Occupancy1'] =  (INB['TALK1'] + INB['DISPO1'])
+INB['OUT Occupancy2'] =  (INB['TALK1'] + INB['DISPO1'] + INB['WAIT1'])
+
+INB['OUT Occupancy%'] = ( INB['OUT Occupancy1'] / INB['OUT Occupancy2'] *100)
+
+
+#) / (Maint['TALK1'] + Maint['DISPO1'] + Maint['WAIT1'])
+
+#Maint['OUT Occupancy%'] = pd.to_datetime(Maint['OUT Occupancy%'], errors='coerce')
+
+
+INB['OUT Occupancy1'] = INB['OUT Occupancy1'].dt.total_seconds()
+INB['OUT Occupancy2'] = INB['OUT Occupancy2'].dt.total_seconds()
+INB['OUT Occupancy%'] = INB['OUT Occupancy1'] / INB['OUT Occupancy2']
+
+
+#operator for time
+#Maint['OUT Occupancy%'] = Maint['OUT Occupancy%'].fillna(0)
+INB = INB.drop(['TALK1', 'DISPO1', 'WAIT1', 'OUT Occupancy1', 'OUT Occupancy2'], axis = 1)
+
+
+INB.head()
+
+
+# In[173]:
+
+
+SHIFT = pd.read_excel(r"C:\Users\reportsn\Desktop\Barc\Shift List.xlsx")
+SHIFT.head()
+
+
+# In[174]:
+
+
+
+
+
+INB.head()
+
+
+# In[175]:
+
+
+INB.dropna(subset=['LOGIN TIME'], inplace=True)
+
+
+# In[176]:
+
+
+INB.to_excel(r"C:\Users\reportsn\Desktop\Akshay\Barc Inbound.xlsx", index= False)
+
+
