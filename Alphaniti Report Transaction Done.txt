@@ -1,0 +1,51 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[7]:
+
+
+import pandas as pd
+import numpy as np
+
+
+# In[8]:
+
+
+AlphaTrans = pd.read_excel(r"C:\Users\reportsn\Desktop\Akshay\Alphanii Dispositions Report.xlsx", sheet_name = "Alphaniti Data")
+AlphaTrans.head()
+
+
+# In[9]:
+
+
+AlphaTrans  = AlphaTrans.loc[AlphaTrans['Status'] == "Transaction Done - Booked"]
+AlphaTrans = AlphaTrans.rename(columns={'list_name': 'Data Source'})
+
+
+# In[10]:
+
+
+AlphaTrans
+
+
+# In[11]:
+
+
+AlphaTrans  =pd.pivot_table(data= AlphaTrans, index = ['Campaigns', 'Data Source'], values = 'phone_number_dialed', aggfunc = np.size, fill_value=0, margins = True, margins_name= 'Total')
+
+AlphaTrans = AlphaTrans.rename(columns={'phone_number_dialed': 'Count'})
+AlphaTrans
+
+
+# In[12]:
+
+
+AlphaTrans.to_excel(r"C:\Users\reportsn\Desktop\Akshay\Transaction Done.xlsx")
+
+
+# In[ ]:
+
+
+
+
+

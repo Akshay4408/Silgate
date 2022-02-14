@@ -1,0 +1,63 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[174]:
+
+
+import pandas as pd
+import numpy as np
+
+
+# In[175]:
+
+
+Main = pd.read_excel(r"C:\Users\reportsn\Desktop\Attt.xlsx")
+
+Main.head()
+
+
+# In[159]:
+
+
+Main = Main.drop('Date', axis= True)
+
+
+# In[160]:
+
+
+Main = Main.apply(pd.Series.value_counts)
+Main = Main.fillna(0)
+
+
+# In[161]:
+
+
+#Main.T
+Main
+
+
+# In[162]:
+
+
+Main = Main.append(Main.sum().rename('Total'))
+Main
+
+
+# In[163]:
+
+
+Main.T
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+

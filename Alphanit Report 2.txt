@@ -1,0 +1,109 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[14]:
+
+
+import pandas as pd
+import numpy as np
+
+
+# In[15]:
+
+
+Raw = pd.read_excel(r"C:\Users\reportsn\Desktop\Alphanity\Daily Report\Export.xlsx")
+Raw.head()
+
+
+# In[16]:
+
+
+values = ["Agent Not Available", "Outbound Pre-Routing Drop", "Test_Call", "Answering Machine", "Call Transferred", "Answering Machine Auto", "No Answer AutoDial", "Busy Auto", "Lead Being Called", "Disconnected Number Auto"]
+
+Raw = Raw[Raw.status_name.isin(values) == False]
+
+
+# In[17]:
+
+
+Raw['campaign_id'] = Raw['campaign_id'].replace(['ALPHANIT'],'Alphaniti')
+
+
+# In[18]:
+
+
+
+
+DL = pd.read_excel(r"C:\Users\reportsn\Desktop\Alphanity\Dispositions Data\Dispositions Dataa.xlsx")
+DL.head()
+
+
+# In[19]:
+
+
+
+
+Raw = pd.merge(Raw, DL, how='left',
+        left_on='status_name', right_on='status_name')
+Raw = Raw.rename(columns = {'full_name' : 'USER NAME'})
+
+Raw.head()
+
+
+# In[20]:
+
+
+Raw = Raw.loc[Raw['campaign_id'] == "Alphaniti"]
+
+
+# In[21]:
+
+
+
+
+Raw.sort_values(by = ['phone_number_dialed', 'call_date'], ascending = [True, False], na_position = 'first')
+Raw.head()
+
+
+# In[22]:
+
+
+Raw = Raw.drop_duplicates(
+  subset = ['phone_number_dialed'],
+  keep = 'last').reset_index(drop = True)
+
+
+# In[23]:
+
+
+Raw = Raw.loc[Raw['NI Reasons'] == "Not Intrested"]
+
+
+# In[24]:
+
+
+Raw = Raw.rename(columns = {'campaign_id' : 'Campaigns'})
+
+
+# In[25]:
+
+
+NotInt  =pd.pivot_table(data= Raw, index = ['Campaigns', 'status_name'], values = 'phone_number_dialed', aggfunc = np.size, fill_value=0, margins = True, margins_name= 'Total')
+
+NotInt = NotInt.rename(columns={'phone_number_dialed': 'Count'})
+
+NotInt
+
+
+# In[26]:
+
+
+NotInt.to_excel(r"C:\Users\reportsn\Desktop\Akshay\Alphaniti Not Intrested.xlsx")
+
+
+# In[ ]:
+
+
+
+
+

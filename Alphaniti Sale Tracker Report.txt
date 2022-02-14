@@ -1,0 +1,95 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[128]:
+
+
+import pandas as pd
+import numpy as np
+
+
+# In[129]:
+
+
+Export = pd.read_excel(r"C:\Users\reportsn\Desktop\Pract\Alphnt.xlsx")
+Export.head()
+
+
+# In[130]:
+
+
+Export.info()
+
+
+# In[131]:
+
+
+#Export['Booking Date'] = Export['Booking Date'].dt.month_name(locale = 'English')
+
+Export['Mon_Year'] = Export['Booking Date'].dt.strftime('%b-%Y')
+Export.head()
+
+
+# In[132]:
+
+
+Export['Mon_Year'] = pd.to_datetime(Export['Mon_Year'])
+Export.head()
+
+
+# In[133]:
+
+
+Export.info()
+
+
+# In[134]:
+
+
+Result1  =pd.pivot_table(data= Export, index = ['Mon_Year'],columns= ['Type'] ,values = 'Booking', aggfunc = np.size, fill_value=0, margins = True, margins_name= 'Total')
+
+#Result1 = Result1.rename(columns={'Week': 'Total'})
+
+Result1
+
+
+# In[135]:
+
+
+Result2  =pd.pivot_table(data= Export, index = ['Mon_Year'],columns= ['Type'] ,values = 'Investment Amount', aggfunc = np.sum, fill_value=0, margins = True, margins_name= 'Total')
+
+#Result1 = Result1.rename(columns={'Week': 'Total'})
+
+Result2
+
+
+# In[136]:
+
+
+Result1.info()
+
+
+# In[137]:
+
+
+writer = pd.ExcelWriter(r"C:\Users\reportsn\Desktop\Akshay\Alphaniti Sales Report.xlsx", engine='xlsxwriter')
+
+
+# In[138]:
+
+
+Result1.to_excel(writer, sheet_name='count')
+
+Result2.to_excel(writer, sheet_name='Amount')
+Export.to_excel(writer, sheet_name='Export')
+
+
+
+
+
+# In[139]:
+
+
+writer.save()
+
+

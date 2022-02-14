@@ -1,0 +1,143 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[83]:
+
+
+import pandas as pd
+import numpy as np
+
+
+# In[84]:
+
+
+Client = pd.read_excel(r"C:\Users\reportsn\Desktop\Alphanity\Daily Report\Export.xlsx")
+Client.head()
+
+
+# In[85]:
+
+
+values = ["Agent Not Available", "Outbound Pre-Routing Drop", "Test_Call", "Answering Machine", "Call Transferred", "Answering Machine Auto", "No Answer AutoDial", "Busy Auto", "Lead Being Called", "Disconnected Number Auto"]
+
+Client = Client[Client.status_name.isin(values) == False]
+
+
+# In[86]:
+
+
+Client['campaign_id'] = Client['campaign_id'].replace(['ALPHANIT'],'Alphaniti')
+
+
+# In[87]:
+
+
+Client = Client.loc[Client['campaign_id'] == "Alphaniti"]
+
+
+# In[88]:
+
+
+
+
+Client.sort_values(by = ['phone_number_dialed', 'call_date'], ascending = [True, False], na_position = 'first')
+Client.head()
+
+
+# In[89]:
+
+
+Appenddata = Client.loc[Client['status_name'] == "Transaction Done - Booked"]
+
+
+# In[90]:
+
+
+values = ["Transaction Done - Booked"]
+
+Client = Client[Client.status_name.isin(values) == False]
+
+
+# In[91]:
+
+
+Alphaniti = Client.drop_duplicates(
+  subset = ['phone_number_dialed'],
+  keep = 'last').reset_index(drop = True)
+
+
+# In[92]:
+
+
+Alphaniti = Alphaniti.append(Appenddata, ignore_index=False)
+
+
+# In[93]:
+
+
+Alphaniti['status_name'] = Alphaniti['status_name'].replace(['DO NOT CALL'],'Not Interested')
+Alphaniti['status_name'] = Alphaniti['status_name'].replace(['Hangup'],'Hang Up - During Presentation')
+Alphaniti['status_name'] = Alphaniti['status_name'].replace(['Call Back'],'CB - Before Presentation')
+Alphaniti['status_name'] = Alphaniti['status_name'].replace(['PL Employee'],'Not Interested')
+
+
+# In[94]:
+
+
+
+
+DL = pd.read_excel(r"C:\Users\reportsn\Desktop\Alphanity\Dispositions Data\Dispositions Dataa.xlsx")
+DL.head()
+
+
+# In[95]:
+
+
+
+
+Alphaniti = pd.merge(Alphaniti, DL, how='left',
+        left_on='status_name', right_on='status_name')
+Alphaniti = Alphaniti.rename(columns = {'full_name' : 'USER NAME'})
+
+Alphaniti.head()
+
+
+# In[96]:
+
+
+Alphaniti = Alphaniti.rename(columns = {'campaign_id' : 'Campaigns'})
+
+
+# In[97]:
+
+
+AlphanitReport  =pd.pivot_table(data= Alphaniti, index = ['Campaigns', 'Dispositions', 'status_name'], values = 'phone_number_dialed', aggfunc = np.size, fill_value=0, margins = True, margins_name= 'Total')
+
+AlphanitReport = AlphanitReport.rename(columns={'phone_number_dialed': 'Count'})
+
+AlphanitReport
+
+
+# In[98]:
+
+
+writer = pd.ExcelWriter(r"C:\Users\reportsn\Desktop\Akshay\Alphanii Disposition Report.xlsx", engine='xlsxwriter')
+
+
+# In[99]:
+
+
+AlphanitReport.to_excel(writer, sheet_name='AlphanitReport')
+
+Alphaniti.to_excel(writer, sheet_name='Alphaniti')
+
+
+
+
+
+# In[100]:
+
+
+writer.save()
+
+

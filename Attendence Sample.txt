@@ -1,0 +1,311 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[1595]:
+
+
+
+import pandas as pd
+import numpy as np
+
+
+# In[1596]:
+
+
+
+apr1 = pd.read_csv(r"C:\Users\reportsn\Desktop\APR\one.csv")
+apr1 = apr1.iloc[3:]
+#apr1.apr1[:-1,:]
+apr1 = apr1.rename(columns=apr1.iloc[0]).drop(apr1.index[0])
+apr1 = apr1.iloc[:-1 , :]
+
+apr1.head()
+
+
+# In[1597]:
+
+
+
+apr2 = pd.read_csv(r"C:\Users\reportsn\Desktop\APR\two.csv")
+apr2 = apr2.iloc[3:]
+#apr1.apr1[:-1,:]
+apr2 = apr2.rename(columns=apr2.iloc[0]).drop(apr2.index[0])
+apr2 = apr2.iloc[:-1 , :]
+
+apr2.head()
+
+
+# In[1598]:
+
+
+apr1 = apr1[['USER NAME', 'ID','CALLS', 'TIME', 'TALK', 'DISPO','WAIT', 'PAUSE']]
+
+
+# In[1599]:
+
+
+apr2 = apr2[['USER NAME', 'ID','LunchB', 'TeaBre']]
+
+
+# In[1600]:
+
+
+apr1 = apr1.rename(columns = {'TIME' : 'Total WHrs','USER NAME': 'USER_NAME'})
+apr1.head()
+
+
+# In[1601]:
+
+
+Result = pd.merge(apr1, apr2, how = 'inner', on = 'ID')
+Result.head()
+
+
+# In[1602]:
+
+
+values = ["Akash Bhande", "Ankita Kesarwani", "Poonam Giri"]
+
+Result = Result[Result.USER_NAME.isin(values) == False]
+Result.head()
+
+
+# In[1603]:
+
+
+Result.head()
+
+
+# In[1604]:
+
+
+#Result.drop(['USER NAME_y'], axis = 1)
+
+
+# In[1605]:
+
+
+Result['LunchB'] = pd.to_timedelta(Result['LunchB'])
+Result['TeaBre'] = pd.to_timedelta(Result['TeaBre'])
+
+Result['BREAK'] = Result['LunchB'] + Result['TeaBre']
+
+
+# In[1606]:
+
+
+Result['BREAK'] = Result['BREAK'].dt.total_seconds()
+
+
+# In[1607]:
+
+
+
+#operator for time
+
+import operator
+fmt = operator.methodcaller('strftime', '%H:%M:%S')
+Result['BREAK'] = pd.to_datetime(Result['BREAK'], unit='s').map(fmt)
+
+Result = Result.drop(['LunchB', 'TeaBre', 'USER_NAME'], axis = 1)
+
+Result.head()
+
+
+# In[1608]:
+
+
+Result['TALK1'] = pd.to_timedelta(Result['TALK'])
+Result['WAIT1'] = pd.to_timedelta(Result['WAIT'])
+Result['PAUSE1'] = pd.to_timedelta(Result['PAUSE'])
+
+
+
+Result['Total Handling Time'] = Result['TALK1'] + Result['WAIT1'] + Result['PAUSE1']
+
+Result['Total Handling Time'] = Result['Total Handling Time'].dt.total_seconds()
+
+
+
+#operator for time
+
+import operator
+fmt = operator.methodcaller('strftime', '%H:%M:%S')
+Result['Total Handling Time'] = pd.to_datetime(Result['Total Handling Time'], unit='s').map(fmt)
+
+#Result = Result.drop(['TALK1', 'WAIT1', 'PAUSE1'], axis = 1)
+
+Result.head()
+
+
+# In[1609]:
+
+
+Result['CALLS'] = Result['CALLS'].astype(int)
+
+
+# In[1610]:
+
+
+Result['Total Handling Time'] = pd.to_timedelta(Result['Total Handling Time'])
+
+
+# In[1611]:
+
+
+Result['Total Handling Time'] = Result['Total Handling Time'].dt.total_seconds()
+
+
+# In[1612]:
+
+
+Result.info()
+
+
+# In[1613]:
+
+
+Result.head()
+
+
+# In[1614]:
+
+
+Result['AHT1'] = Result['Total Handling Time'] / Result['CALLS']
+Result["AHT1"].fillna(0, inplace = True)
+
+
+# In[1615]:
+
+
+import operator
+fmt = operator.methodcaller('strftime', '%H:%M:%S')
+Result['AHT'] = pd.to_datetime(Result['AHT1'], unit='s').map(fmt)
+
+#Result = Result.drop(['LunchB', 'TeaBre', 'USER NAME_y'], axis = 1)
+
+Result.head()
+
+
+# In[1616]:
+
+
+import operator
+fmt = operator.methodcaller('strftime', '%H:%M:%S')
+Result['Total Handling Time'] = pd.to_datetime(Result['Total Handling Time'], unit='s').map(fmt)
+
+#Result = Result.drop(['LunchB', 'TeaBre', 'USER NAME_y'], axis = 1)
+Result = Result.drop(['AHT1'], axis = 1)
+Result = Result.rename(columns = {'USER NAME_x' : 'USER NAME'})
+
+Result.head()
+
+
+# In[1617]:
+
+
+Result['BREAK1'] = pd.to_timedelta(Result['BREAK'])
+Result['LOGIN TIME1'] = pd.to_timedelta(Result['Total WHrs'])
+
+
+# In[1618]:
+
+
+Result['Net Login'] = Result['LOGIN TIME1'] - Result['BREAK'] 
+
+Result['Net Login'] = Result['Net Login'].dt.total_seconds()
+
+Result['Net Login'] = Result['Net Login'].fillna(0)
+
+
+
+
+
+#operator for time
+
+import operator
+fmt = operator.methodcaller('strftime', '%H:%M:%S')
+Result['Net Login'] = pd.to_datetime(Result['Net Login'], unit='s').map(fmt)
+
+#Result = Result.drop(['TALK1', 'WAIT1', 'PAUSE1'], axis = 1)
+
+Result.head()
+
+
+
+# In[1619]:
+
+
+Result['Net Login1'] = pd.to_timedelta(Result['Net Login'])
+
+
+# In[1620]:
+
+
+Result.info()
+
+
+# In[1621]:
+
+
+Result['Net Login1'] = pd.to_timedelta(Result['Net Login'])
+
+Result['Utilization %'] = Result['Net Login1'] / Result['LOGIN TIME1'] 
+
+#Result['Utilization %'] = Result['Utilization %'].dt.total_seconds()
+
+Result['Utilization %'] = Result['Utilization %'].fillna(0)
+
+Result = Result[Result['Utilization %'] != 'inf']
+#operator for time
+Result.head()
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[1622]:
+
+
+Result['DISPO1'] = pd.to_timedelta(Result['DISPO'])
+Result['Occupancy %'] = (Result['TALK1'] + Result['DISPO1']) / (Result['TALK1'] + Result['WAIT1'] + Result['DISPO1'])
+Result['Occupancy %'] = Result['Occupancy %'].fillna(0)
+
+
+# In[1623]:
+
+
+Result = Result[['USER NAME','ID', 'CALLS', 'Total WHrs', 'TALK', 'WAIT', 'PAUSE', 'DISPO', 'BREAK', 'Total Handling Time', 'Net Login', 'AHT', 'Utilization %', 'Occupancy %']]
+
+
+# In[1624]:
+
+
+Result.head()
+
+
+# In[1625]:
+
+
+
+Result['Utilization %'] = Result['Utilization %'].map(lambda n: '{:,.0%}'.format(n))
+Result['Occupancy %'] = Result['Occupancy %'].map(lambda n: '{:,.0%}'.format(n))
+
+Result
+
+
+# In[1626]:
+
+
+Result.to_excel(r"C:\Users\reportsn\Desktop\Akshay\Attendence SampleRport.xlsx", index= False)
+
+

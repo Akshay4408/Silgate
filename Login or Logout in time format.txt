@@ -1,0 +1,134 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[20]:
+
+
+import pandas as pd
+import numpy as np
+
+
+# In[21]:
+
+
+Main = pd.read_excel(r"C:\Users\reportsn\Desktop\attendence.xlsx")
+Main.head()
+
+
+# In[22]:
+
+
+Login = Main.loc[Main['event'] == "LOGIN"]
+Login = Login[['user', 'event_date']]
+Login = Login.rename(columns = {'event_date' : 'Login Date'})
+
+Login.head()
+
+
+# In[23]:
+
+
+Login = Login.drop_duplicates(
+  subset = ['user'],
+  keep = 'first').reset_index(drop = True)
+
+
+Login.head()
+
+
+# In[24]:
+
+
+Logout = Main.loc[Main['event'] == "LOGOUT"]
+Logout = Logout[['user', 'event_date']]
+Logout = Logout.rename(columns = {'event_date' : 'Logout Date'})
+Logout.head()
+
+
+# In[25]:
+
+
+Logout = Logout.drop_duplicates(
+  subset = ['user'],
+  keep = 'last').reset_index(drop = True)
+
+
+Logout.head()
+
+
+# In[26]:
+
+
+
+
+Attend = pd.merge(Login, Logout, how='left',
+        left_on='user', right_on='user')
+#Attend = Attend.rename(columns = {'full_name' : 'USER NAME'})
+
+Attend.head()
+
+
+# In[27]:
+
+
+Attend['diff_seconds'] = Attend['Logout Date'] - Attend['Login Date']
+
+
+# In[28]:
+
+
+Attend['diff_seconds']=Attend['diff_seconds']/np.timedelta64(1,'s')
+
+
+# In[29]:
+
+
+Attend.head()
+
+
+# In[30]:
+
+
+
+#operator for time
+
+import operator
+fmt = operator.methodcaller('strftime', '%H:%M:%S')
+Attend['Total Hrs'] = pd.to_datetime(Attend['diff_seconds'], unit='s').map(fmt)
+
+Attend.head()
+
+
+# In[31]:
+
+
+from datetime import datetime
+#Attend['Login'] = Attend['Login'].strftime("%I:%M %p")
+
+Attend["Login Time"] = Attend["Login Date"].dt.strftime("%H:%M:%S")
+Attend["Logout Time"] = Attend["Logout Date"].dt.strftime("%H:%M:%S")
+Attend = Attend[['user', 'Login Time', 'Logout Time', 'Total Hrs']]
+Attend = Attend.rename(columns = {'user' : 'EMP ID'})
+#print(datetime.today().strftime("%I:%M %p"))
+Attend.head()
+
+
+# In[32]:
+
+
+Attend['Shift'] = "10:00:00"
+Attend.head()
+
+
+# In[33]:
+
+
+Attend.info()
+
+
+# In[ ]:
+
+
+
+
+

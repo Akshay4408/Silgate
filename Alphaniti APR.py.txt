@@ -1,0 +1,383 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[33]:
+
+
+
+import pandas as pd
+import numpy as np
+
+
+# In[34]:
+
+
+
+
+
+apr1 = pd.read_excel(r"C:\Users\reportsn\Desktop\APR\one.xlsx")
+apr1 = apr1.iloc[3:]
+#apr1.apr1[:-1,:]
+apr1 = apr1.rename(columns=apr1.iloc[0]).drop(apr1.index[0])
+apr1 = apr1.iloc[:-1 , :]
+
+apr1.head()
+
+
+# In[35]:
+
+
+
+
+# APR
+apr2 = pd.read_excel(r"C:\Users\reportsn\Desktop\APR\two.xlsx")
+
+apr2 = apr2.iloc[3:]
+#apr2.iloc[:-1,:]
+
+apr2 = apr2.rename(columns=apr2.iloc[0]).drop(apr2.index[0])
+
+apr2 = apr2.iloc[:-1 , :]
+
+apr2.head()
+
+
+# In[36]:
+
+
+
+
+#CALL EXPORT
+rw = pd.read_excel(r"C:\Users\reportsn\Desktop\APR\Raw.xlsx")
+
+rw.head()
+
+
+# In[37]:
+
+
+
+
+DL = pd.read_excel(r"C:\Users\reportsn\Desktop\Alphanity\Dispositions Data\Dispositions Dataa.xlsx")
+DL.head()
+
+
+# In[38]:
+
+
+
+
+Report = pd.merge(rw, DL, how='left',
+        left_on='status_name', right_on='status_name')
+Report = Report.rename(columns = {'full_name' : 'USER NAME'})
+
+Report.head()
+
+
+# In[39]:
+
+
+
+Report =pd.pivot_table(data= Report, index = ['USER NAME'], columns = ['Dispositions'],values = 'phone_number_dialed', aggfunc = np.size, fill_value=0, margins = True, margins_name= 'Total')
+
+Report.head()
+
+
+# In[40]:
+
+
+
+
+
+apr1 = apr1[['ID','USER NAME', 'TALK', 'PAUSE', 'WAIT']]
+#apr1 = apr1.rename(columns = {'TOTAL' : 'LOGIN'})
+apr1.head()
+
+
+# In[41]:
+
+
+
+
+
+apr2 = apr2[['ID','USER NAME', 'TOTAL', 'LunchB', 'TeaBre']]
+apr2 = apr2.rename(columns = {'TOTAL' : 'LOGIN'})
+apr2.head()
+
+
+# In[42]:
+
+
+
+Result = pd.merge(apr1, apr2, how = 'inner', on = 'USER NAME')
+Result.head() 
+
+
+# In[43]:
+
+
+
+Result = pd.merge(Result, Report, how = 'inner', on = 'USER NAME')
+Result
+
+
+# In[44]:
+
+
+
+
+from datetime import date
+from datetime import timedelta
+
+
+# In[45]:
+
+
+
+Result['DATE'] =  date.today()
+#Result['DATE']  =Result['DATE'].dt.strftime("%m/%d/%y")
+Result['DATE']  =  Result['DATE'] - timedelta(days = 1)
+
+Result.head()
+
+
+# In[46]:
+
+
+
+
+Result = Result[['DATE', 'ID_x','USER NAME', 'TALK',   'LOGIN', 'LunchB','TeaBre','Connect', 'Not Connect', 'Total', 'PAUSE', 'WAIT']]
+
+Result.head()
+
+
+# In[47]:
+
+
+
+
+Result['Lhour'] = pd.to_datetime(Result['LunchB'], format='%H:%M:%S').dt.hour
+Result['Lminutes'] = pd.to_datetime(Result['LunchB'], format='%H:%M:%S').dt.minute
+Result['Lsecond'] = pd.to_datetime(Result['LunchB'], format='%H:%M:%S').dt.second
+
+
+
+Result['Lhour'] = Result['Lhour'] * 3600
+Result['Lminutes'] = Result['Lminutes'] * 60
+
+
+Result['Llunch']  = Result['Lhour'] + Result['Lminutes'] + Result['Lsecond']
+
+
+# In[35]:
+
+
+Result['Thour'] = pd.to_datetime(Result['TeaBre'], format='%H:%M:%S').dt.hour
+Result['Tminutes'] = pd.to_datetime(Result['TeaBre'], format='%H:%M:%S').dt.minute
+Result['Tsecond'] = pd.to_datetime(Result['TeaBre'], format='%H:%M:%S').dt.second
+
+
+Result['Thour']= Result['Thour'] * 3600
+Result['Tminutes'] = Result['Tminutes'] * 60
+
+Result['Ttea']  = Result['Thour'] +Result['Tminutes'] + Result['Tsecond']
+
+
+# In[48]:
+
+
+
+
+Result['Break'] = Result['Llunch'] + Result['Ttea'] 
+
+
+# In[49]:
+
+
+
+import operator
+fmt = operator.methodcaller('strftime', '%H:%M:%S')
+Result['BREAK'] = pd.to_datetime(Result['Break'], unit='s').map(fmt)
+
+
+# In[50]:
+
+
+
+Result1 = Result
+
+
+# In[51]:
+
+
+
+
+Result1['Thour'] = pd.to_datetime(Result1['TALK'], format='%H:%M:%S').dt.hour
+Result1['Tminutes'] = pd.to_datetime(Result1['TALK'], format='%H:%M:%S').dt.minute
+Result1['Tsecond'] = pd.to_datetime(Result1['TALK'], format='%H:%M:%S').dt.second
+
+
+Result1['Thour'] = Result1['Thour'] * 3600
+Result1['Tminutes'] = Result1['Tminutes'] * 60
+
+Result1['Ttalk']  = Result1['Thour'] + Result1['Tminutes'] + Result1['Tsecond']
+
+
+# In[40]:
+
+
+Result1['Whour'] = pd.to_datetime(Result1['WAIT'], format='%H:%M:%S').dt.hour
+Result1['Wminutes'] = pd.to_datetime(Result1['WAIT'], format='%H:%M:%S').dt.minute
+Result1['Wsecond'] = pd.to_datetime(Result1['WAIT'], format='%H:%M:%S').dt.second
+
+
+
+Result1['Whour']= Result1['Whour'] * 3600
+Result1['Wminutes'] = Result1['Wminutes'] * 60
+
+Result1['Wwait']  = Result1['Whour'] +Result1['Wminutes'] + Result1['Wsecond']
+
+
+# In[52]:
+
+
+
+Result1['Phour'] = pd.to_datetime(Result1['PAUSE'], format='%H:%M:%S').dt.hour
+Result1['Pminutes'] = pd.to_datetime(Result1['PAUSE'], format='%H:%M:%S').dt.minute
+Result1['Psecond'] = pd.to_datetime(Result1['PAUSE'], format='%H:%M:%S').dt.second
+
+
+
+Result1['Phour']= Result1['Phour'] * 3600
+Result1['Pminutes'] = Result1['Pminutes'] * 60
+
+Result1['Ppause']  = Result1['Phour'] +Result1['Pminutes'] + Result1['Psecond']
+
+
+# In[53]:
+
+
+Result1['Total Handling Time1'] = Result1['Ttalk'] + Result1['Wwait'] + Result1['Ppause']
+
+
+# In[54]:
+
+
+
+
+import operator
+fmt = operator.methodcaller('strftime', '%H:%M:%S')
+Result1['Total Handling Time'] = pd.to_datetime(Result1['Total Handling Time1'], unit='s').map(fmt)
+
+
+# In[55]:
+
+
+Result1['AHT1'] = Result1['Total Handling Time1'] / Result1['Total']
+
+
+# In[56]:
+
+
+Result1["AHT1"].fillna(0, inplace = True)
+
+
+# In[57]:
+
+
+import operator
+fmt = operator.methodcaller('strftime', '%H:%M:%S')
+Result1['AHT'] = pd.to_datetime(Result1['AHT1'] , unit='s').map(fmt)
+
+#Result1 = Result1.drop(columns=['Total Handling Time1', 'AHT1'])
+Result1.head()
+
+
+# In[58]:
+
+
+
+
+Result1 = Result1[['DATE', 'ID_x','USER NAME', 'LOGIN', 'TALK','BREAK','Total Handling Time','Total Handling Time1','AHT','Connect', 'Not Connect', 'Total']]
+Result1 = Result1.rename(columns = {'ID_x' : 'ID'})
+Result1 = Result1.rename(columns = {'Total Handling Time' : 'TOTAL HANDLING TIME', 'Connect': 'CONNECT', 'Not Connect': 'NOT CONNECT', 'Total' : 'TOTAL CALLS'})
+
+Result1.head()
+
+
+# In[59]:
+
+
+
+
+Result1['TLLhour'] = pd.to_datetime(Result1['LOGIN'], format='%H:%M:%S').dt.hour
+Result1['TLLminutes'] = pd.to_datetime(Result1['LOGIN'], format='%H:%M:%S').dt.minute
+Result1['TLLsecond'] = pd.to_datetime(Result1['LOGIN'], format='%H:%M:%S').dt.second
+
+
+
+
+Result1['TLLhour'] = Result1['TLLhour'] * 3600
+Result1['TLLminutes'] = Result1['TLLminutes'] * 60
+
+
+Result1['TLogin']  = Result1['TLLhour'] + Result1['TLLminutes'] + Result1['TLLsecond']
+
+Result1.head()
+
+
+# In[60]:
+
+
+Result1['Occupancy%'] = (Result1['Total Handling Time1'] / Result1['TLogin'] * 100).round(2).astype(str) + '%' 
+
+#Result1['Occupancy%']  = Result1['Occupancy'].round(2)
+
+#Result1['Occupancy %'] = pd.Series(["{0:.0f}%".format(val * 10) for val in Result1['Occupancy']], index = Result1.index)
+Result1.head()
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[61]:
+
+
+Result1 = Result1.drop(columns=['TLLhour', 'TLLminutes', 'TLLsecond', 'Total Handling Time1'])
+Result1 = Result1[['DATE', 'ID', 'USER NAME', 'LOGIN', 'TALK', 'BREAK', 'TOTAL HANDLING TIME', 'AHT', 'TOTAL CALLS', 'CONNECT', 'NOT CONNECT', 'Occupancy%']]
+Result1.head()
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[63]:
+
+
+Result1.to_excel(r"C:\Users\reportsn\Desktop\Akshay\Alphaniti APR.xlsx")
+
+
+# In[ ]:
+
+
+
+
+

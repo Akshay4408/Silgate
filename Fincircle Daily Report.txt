@@ -1,0 +1,152 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[254]:
+
+
+import pandas as pd
+import numpy as np
+
+
+# In[255]:
+
+
+Fin = pd.read_excel(r"C:\Users\reportsn\Desktop\Alphanity\Daily Report\Export.xlsx")
+Fin.head()
+
+
+# In[256]:
+
+
+Fin = Fin.loc[Fin['campaign_id'] == "FINCIRCL"]
+Fin.head()
+
+
+# In[257]:
+
+
+
+
+DL = pd.read_excel(r"C:\Users\reportsn\Desktop\Alphanity\Dispositions Data\Fincircle Dispositions.xlsx")
+DL.head()
+
+
+# In[258]:
+
+
+values = ["Agent Not Available", "Outbound Pre-Routing Drop", "Test_Call", "Answering Machine", "Call Transferred", "Answering Machine Auto", "No Answer AutoDial", "Busy Auto"]
+
+Fin = Fin[Fin.status_name.isin(values) == False]
+Fin.head()
+
+
+# In[259]:
+
+
+Fin['status_name'] = Fin['status_name'].replace(['No Answer AutoDial', 'Busy Auto', 'Disconnected Number Auto', 'Incoming Facility Not Avail', 'Disconnected Number'],'No Answer')
+
+
+# In[260]:
+
+
+Fin['status_name'] = Fin['status_name'].replace(['Call Back'],'CB - After Presentation')
+Fin['status_name'] = Fin['status_name'].replace(['Hangup'],'Hang Up - During Presentation')
+Fin['status_name'] = Fin['status_name'].replace(['No Answer'],'Hang Up - During Presentation')
+
+
+# In[261]:
+
+
+
+
+Finc = pd.merge(Fin, DL, how='left',
+        left_on='status_name', right_on='status_name')
+#Finc = Finc.rename(columns = {'full_name' : 'USER NAME'})
+
+Finc.head()
+
+
+# In[262]:
+
+
+Finc['status_name'] = Finc['status_name'].replace(['NI-Before Presentation', 'NI-After Presentation', 'NI-Already Invested', 'NI-Financial Issues', 'NI-invest through Alphaniti'],'Not Interested')
+
+
+# In[263]:
+
+
+
+
+Finc.sort_values(by = ['phone_number_dialed', 'call_date'], ascending = [True, False], na_position = 'first')
+Finc.head()
+
+
+# In[264]:
+
+
+Finccircl = Finc.drop_duplicates(
+  subset = ['phone_number_dialed'],
+  keep = 'last').reset_index(drop = True)
+
+
+# In[265]:
+
+
+FincCirclReport  =pd.pivot_table(data= Finccircl, index = ['Dispositions'], values = 'phone_number_dialed', aggfunc = np.size, fill_value=0, margins = True, margins_name= 'Total')
+
+FincCirclReport = FincCirclReport.rename(columns={'phone_number_dialed': 'Count'})
+
+FincCirclReport
+
+
+# In[266]:
+
+
+Finc.head()
+
+
+# In[267]:
+
+
+Finc['Count'] = Finc.groupby(['phone_number_dialed']).cumcount()+1
+
+
+# In[268]:
+
+
+def test(x):
+    if x == 1:
+        return "Unique"
+    else:
+        return "Duplicate"
+
+
+# In[269]:
+
+
+Finc['T & F'] = Finc['Count'].apply(lambda x: test(x))
+
+
+# In[270]:
+
+
+writer = pd.ExcelWriter(r"C:\Users\reportsn\Desktop\Akshay\Finc Daily Report.xlsx", engine='xlsxwriter')
+
+
+# In[271]:
+
+
+Finc.to_excel(writer, sheet_name='Dump', index=False)
+
+FincCirclReport.to_excel(writer, sheet_name='FincCirclReport')
+
+
+
+
+
+# In[272]:
+
+
+writer.save()
+
+

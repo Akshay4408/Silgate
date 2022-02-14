@@ -1,0 +1,47 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[2]:
+
+
+import pandas as pd
+import numpy as np
+
+
+# In[5]:
+
+
+Export = pd.read_excel(r"C:\Users\reportsn\Desktop\Alphanity\Master Data\Export\Overall Export.xlsx")
+
+Export.head()
+
+
+# In[6]:
+
+
+a = Export.value_counts(['MOBILE']) 
+
+x = pd.DataFrame(a)
+
+x = x.rename(columns = {0 : 'Attempts'})
+
+
+# In[7]:
+
+
+Export =  pd.merge(Export ,x, how = "inner", on = "MOBILE")
+Export.head()
+
+
+# In[8]:
+
+
+Export.to_excel(r"C:\Users\reportsn\Desktop\Akshay\Attempts Data.xlsx")
+
+
+# In[ ]:
+
+
+
+
+

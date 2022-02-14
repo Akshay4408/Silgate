@@ -1,0 +1,128 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[113]:
+
+
+import pandas as pd
+import numpy as np
+
+
+# In[114]:
+
+
+Main = pd.read_excel(r"C:\Users\reportsn\Desktop\Alphanity\Daily Report\Export.xlsx")
+Main.head()
+
+
+# In[115]:
+
+
+values = ["Agent Not Available", "Outbound Pre-Routing Drop", "Test_Call", "Answering Machine", "Call Transferred", "Answering Machine Auto", "No Answer AutoDial", "Busy Auto", "Lead Being Called", "Disconnected Number Auto"]
+
+Main = Main[Main.status_name.isin(values) == False]
+
+
+# In[116]:
+
+
+Main['campaign_id'] = Main['campaign_id'].replace(['ALPHANIT'],'Alphaniti')
+
+
+# In[117]:
+
+
+Main = Main.loc[Dump['campaign_id'] == "Alphaniti"]
+
+
+# In[118]:
+
+
+
+
+Main.sort_values(by = ['phone_number_dialed', 'call_date'], ascending = [True, False], na_position = 'first')
+Main.head()
+
+
+# In[119]:
+
+
+Main['status_name'] = Main['status_name'].replace(['PL Employee'],'DO NOT CALL')
+
+
+# In[120]:
+
+
+#Alphaniti['status_name'] = Alphaniti['status_name'].replace(['DO NOT CALL'],'Not Interested')
+Main['status_name'] = Main['status_name'].replace(['Hangup'],'Hang Up - During Presentation')
+Main['status_name'] = Main['status_name'].replace(['Call Back'],'CB - Before Presentation')
+Main['status_name'] = Main['status_name'].replace(['PL Employee'],'DO NOT CALL')
+
+
+# In[121]:
+
+
+Main['Count'] = Main.groupby(['phone_number_dialed']).cumcount()+1
+
+
+# In[122]:
+
+
+def test(x):
+    if x == 1:
+        return "Unique"
+    else:
+        return "Duplicate"
+
+
+# In[123]:
+
+
+Main['T & F'] = Main['Count'].apply(lambda x: test(x))
+
+
+# In[124]:
+
+
+
+
+DL = pd.read_excel(r"C:\Users\reportsn\Desktop\Alphanity\Dispositions Data\Dispositions Dataa.xlsx")
+DL.head()
+
+
+# In[125]:
+
+
+
+
+Main = pd.merge(Main, DL, how='left',
+        left_on='status_name', right_on='status_name')
+Main = Main.rename(columns = {'full_name' : 'USER NAME'})
+
+Main.head()
+
+
+# In[126]:
+
+
+Main = Main.rename(columns = {'campaign_id' : 'Campaigns'})
+
+
+# In[127]:
+
+
+Main = Main[['call_date', 'phone_number_dialed', 'Count', 'T & F', 'user', 'USER NAME','Campaigns', 'first_name', 'middle_initial','last_name', 'address1', 'city', 'email', 'status_name', 'Dispositions']]
+
+
+# In[128]:
+
+
+Main.to_excel(r"C:\Users\reportsn\Desktop\Akshay\Alphaniti Main Dump.xlsx", index= False)
+
+
+# In[ ]:
+
+
+
+
+
